@@ -39,6 +39,11 @@ import (
 )
 
 const (
+	// ServiceAnnotationSharePIP indicates which pip current service should share.
+	// when the service have this annotation, when allocate the service, it will first try
+	// to find the existing public ip, and try to reuse it.
+	ServiceAnnotationSharePIP = "service.beta.kubernetes.io/azure-share-pip-tag"
+
 	// ServiceAnnotationLoadBalancerInternal is the annotation used on the service
 	ServiceAnnotationLoadBalancerInternal = "service.beta.kubernetes.io/azure-load-balancer-internal"
 
