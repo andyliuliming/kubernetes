@@ -335,6 +335,7 @@ func (az *Cloud) getFrontendIPConfigName(service *v1.Service) string {
 
 		// Azure lb front end configuration name must not exceed 80 characters
 		if len(ipcName) > frontendIPConfigNameMaxLength {
+			klog.V(4).Infof("the ipcName longer than max length %v, so truncate it.", frontendIPConfigNameMaxLength)
 			ipcName = ipcName[:frontendIPConfigNameMaxLength]
 		}
 		return ipcName
