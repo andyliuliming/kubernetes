@@ -655,6 +655,8 @@ func Complete(s *options.ServerRunOptions) (completedServerRunOptions, error) {
 			}
 		}
 
+		// hello???
+		fmt.Printf("########### the issuer in the api server is: %v\n",s.Authentication.ServiceAccounts.Issuer)
 		s.ServiceAccountIssuer, err = serviceaccount.JWTTokenGenerator(s.Authentication.ServiceAccounts.Issuer, sk)
 		if err != nil {
 			return options, fmt.Errorf("failed to build token generator: %v", err)
