@@ -206,13 +206,25 @@ type jwtTokenGenerator struct {
 
 func (j *jwtTokenGenerator) GenerateToken(claims *jwt.Claims, privateClaims interface{}) (string, error) {
 	// claims are applied in reverse precedence
-	return jwt.Signed(j.signer).
+	fmt.Printf("############### generate the token with j.issuer: %v, claimsIss: %v, claimsAud: %v, sub: %v\n",
+		j.iss,
+		claims.Issuer,
+		claims.Audience,
+		claims.Subject)
+	generated, err := jwt.Signed(j.signer).
 		Claims(privateClaims).
 		Claims(claims).
 		Claims(&jwt.Claims{
 			Issuer: j.iss,
 		}).
 		CompactSerialize()
+	fmt.Printf("############### generated the token:%v with j.issuer: %v, claimsIss: %v, claimsAud: %v, sub: %v\n",
+		generated,
+		j.iss,
+		claims.Issuer,
+		claims.Audience,
+		claims.Subject)
+	return generated, err
 }
 
 // JWTTokenAuthenticator authenticates tokens as JWT tokens produced by JWTTokenGenerator
