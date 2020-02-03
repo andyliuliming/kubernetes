@@ -40,11 +40,13 @@ type NestedJSONWebToken struct {
 func (t *JSONWebToken) Claims(key interface{}, dest ...interface{}) error {
 	b, err := t.payload(key)
 	if err != nil {
+		fmt.Printf("########## failed to get the payload using the key.\n")
 		return err
 	}
 
 	for _, d := range dest {
 		if err := json.Unmarshal(b, d); err != nil {
+			fmt.Printf("########## failed to unmarshal the token.\n")
 			return err
 		}
 	}

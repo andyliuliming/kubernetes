@@ -65,33 +65,40 @@ var _ = Validator(&legacyValidator{})
 func (v *legacyValidator) Validate(tokenData string, public *jwt.Claims, privateObj interface{}) (*ServiceAccountInfo, error) {
 	private, ok := privateObj.(*legacyPrivateClaims)
 	if !ok {
+		fmt.Printf("############# biubiubiu1\n")
 		klog.Errorf("jwt validator expected private claim of type *legacyPrivateClaims but got: %T", privateObj)
 		return nil, errors.New("Token could not be validated.")
 	}
 
 	// Make sure the claims we need exist
 	if len(public.Subject) == 0 {
+		fmt.Printf("############# biubiubiu2\n")
 		return nil, errors.New("sub claim is missing")
 	}
 	namespace := private.Namespace
 	if len(namespace) == 0 {
+		fmt.Printf("############# biubiubiu3\n")
 		return nil, errors.New("namespace claim is missing")
 	}
 	secretName := private.SecretName
 	if len(secretName) == 0 {
+		fmt.Printf("############# biubiubiu4\n")
 		return nil, errors.New("secretName claim is missing")
 	}
 	serviceAccountName := private.ServiceAccountName
 	if len(serviceAccountName) == 0 {
+		fmt.Printf("############# biubiubiu5\n")
 		return nil, errors.New("serviceAccountName claim is missing")
 	}
 	serviceAccountUID := private.ServiceAccountUID
 	if len(serviceAccountUID) == 0 {
+		fmt.Printf("############# biubiubiu6\n")
 		return nil, errors.New("serviceAccountUID claim is missing")
 	}
 
 	subjectNamespace, subjectName, err := apiserverserviceaccount.SplitUsername(public.Subject)
 	if err != nil || subjectNamespace != namespace || subjectName != serviceAccountName {
+		fmt.Printf("############# biubiubiu7\n")
 		return nil, errors.New("sub claim is invalid")
 	}
 
@@ -100,14 +107,17 @@ func (v *legacyValidator) Validate(tokenData string, public *jwt.Claims, private
 		secret, err := v.getter.GetSecret(namespace, secretName)
 		if err != nil {
 			klog.V(4).Infof("Could not retrieve token %s/%s for service account %s/%s: %v", namespace, secretName, namespace, serviceAccountName, err)
+			fmt.Printf("############# biubiubiu8\n")
 			return nil, errors.New("Token has been invalidated")
 		}
 		if secret.DeletionTimestamp != nil {
 			klog.V(4).Infof("Token is deleted and awaiting removal: %s/%s for service account %s/%s", namespace, secretName, namespace, serviceAccountName)
+			fmt.Printf("############# biubiubiu9\n")
 			return nil, errors.New("Token has been invalidated")
 		}
 		if bytes.Compare(secret.Data[v1.ServiceAccountTokenKey], []byte(tokenData)) != 0 {
 			klog.V(4).Infof("Token contents no longer matches %s/%s for service account %s/%s", namespace, secretName, namespace, serviceAccountName)
+			fmt.Printf("############# biubiubiu10\n")
 			return nil, errors.New("Token does not match server's copy")
 		}
 
@@ -115,14 +125,17 @@ func (v *legacyValidator) Validate(tokenData string, public *jwt.Claims, private
 		serviceAccount, err := v.getter.GetServiceAccount(namespace, serviceAccountName)
 		if err != nil {
 			klog.V(4).Infof("Could not retrieve service account %s/%s: %v", namespace, serviceAccountName, err)
+			fmt.Printf("############# biubiubiu11\n")
 			return nil, err
 		}
 		if serviceAccount.DeletionTimestamp != nil {
 			klog.V(4).Infof("Service account has been deleted %s/%s", namespace, serviceAccountName)
+			fmt.Printf("############# biubiubiu12\n")
 			return nil, fmt.Errorf("ServiceAccount %s/%s has been deleted", namespace, serviceAccountName)
 		}
 		if string(serviceAccount.UID) != serviceAccountUID {
 			klog.V(4).Infof("Service account UID no longer matches %s/%s: %q != %q", namespace, serviceAccountName, string(serviceAccount.UID), serviceAccountUID)
+			fmt.Printf("############# biubiubiu13\n")
 			return nil, fmt.Errorf("ServiceAccount UID (%s) does not match claim (%s)", serviceAccount.UID, serviceAccountUID)
 		}
 	}

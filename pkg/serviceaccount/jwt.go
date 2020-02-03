@@ -251,11 +251,13 @@ type Validator interface {
 
 func (j *jwtTokenAuthenticator) AuthenticateToken(ctx context.Context, tokenData string) (*authenticator.Response, bool, error) {
 	if !j.hasCorrectIssuer(tokenData) {
+		fmt.Printf("######### have no correct issuer: %v\n", tokenData)
 		return nil, false, nil
 	}
 
 	tok, err := jwt.ParseSigned(tokenData)
 	if err != nil {
+		fmt.Printf("########## failed to parse signed token data: %v\n", tokenData)
 		return nil, false, nil
 	}
 
@@ -277,6 +279,7 @@ func (j *jwtTokenAuthenticator) AuthenticateToken(ctx context.Context, tokenData
 	}
 
 	if !found {
+		fmt.Printf("########## not found\n")
 		return nil, false, utilerrors.NewAggregate(errlist)
 	}
 
@@ -288,12 +291,14 @@ func (j *jwtTokenAuthenticator) AuthenticateToken(ctx context.Context, tokenData
 
 	requestedAudiences, ok := authenticator.AudiencesFrom(ctx)
 	if !ok {
+		fmt.Printf("########## not found the audiences in context, fallback to use : %v\n", j.implicitAuds)
 		// default to apiserver audiences
 		requestedAudiences = j.implicitAuds
 	}
 
 	auds := authenticator.Audiences(tokenAudiences).Intersect(requestedAudiences)
 	if len(auds) == 0 && len(j.implicitAuds) != 0 {
+		fmt.Printf("############# tokens' audiences and requested audiences have no intersection.\n")
 		return nil, false, fmt.Errorf("token audiences %q is invalid for the target audiences %q", tokenAudiences, requestedAudiences)
 	}
 
@@ -301,6 +306,7 @@ func (j *jwtTokenAuthenticator) AuthenticateToken(ctx context.Context, tokenData
 	// issuer string.
 	sa, err := j.validator.Validate(tokenData, public, private)
 	if err != nil {
+		fmt.Printf("############# failed to validate the token with err: %v.\n", err)
 		return nil, false, err
 	}
 
@@ -319,10 +325,13 @@ func (j *jwtTokenAuthenticator) AuthenticateToken(ctx context.Context, tokenData
 func (j *jwtTokenAuthenticator) hasCorrectIssuer(tokenData string) bool {
 	parts := strings.Split(tokenData, ".")
 	if len(parts) != 3 {
+		fmt.Printf("########## wrong parts in hasCorrectIssuer: %v\n", len(parts))
 		return false
 	}
 	payload, err := base64.RawURLEncoding.DecodeString(parts[1])
 	if err != nil {
+		fmt.Printf("########## failed to decode the string\n")
+		fmt.Printf("########## failed to decode the string: %v\n", parts[1])
 		return false
 	}
 	claims := struct {
@@ -330,9 +339,11 @@ func (j *jwtTokenAuthenticator) hasCorrectIssuer(tokenData string) bool {
 		Issuer string `json:"iss"`
 	}{}
 	if err := json.Unmarshal(payload, &claims); err != nil {
+		fmt.Printf("########## failed to unmarshal the payload: %v\n", payload)
 		return false
 	}
 	if claims.Issuer != j.iss {
+		fmt.Printf("########## the issuer does not match. %v, %v\n", claims.Issuer, j.iss)
 		return false
 	}
 	return true

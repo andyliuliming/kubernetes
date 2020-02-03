@@ -18,6 +18,7 @@ package bearertoken
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -60,6 +61,7 @@ func (a *Authenticator) AuthenticateRequest(req *http.Request) (*authenticator.R
 
 	// If the token authenticator didn't error, provide a default error
 	if !ok && err == nil {
+		fmt.Printf("\n")
 		err = invalidToken
 	}
 
