@@ -303,7 +303,7 @@ function kube::release::build_hyperkube_image() {
     "${DOCKER[@]}" save "${hyperkube_tag}" > "${save_dir}/hyperkube-${arch}.tar"
   fi
   kube::log::status "Deleting hyperkube image ${hyperkube_tag}"
-  "${DOCKER[@]}" rmi "${hyperkube_tag}" &>/dev/null || true
+  # "${DOCKER[@]}" rmi "${hyperkube_tag}" &>/dev/null || true
 }
 
 function kube::release::build_conformance_image() {
